@@ -1,0 +1,64 @@
+
+> @se-2/hardhat@0.0.1 deploy
+> hardhat compile && tsx scripts/runHardhatDeployWithPK.ts --network localhost
+
+No contracts to compile
+- Executing E:\defi-lending-viction-main\packages\hardhat\deploy\01_core.ts
+Deploying PoolAddressesProvider...
+reusing "PoolAddressesProvider" at 0x998abeb3e57409262ae5b751f60747921b33613e
+PoolAddressesProvider: 0x998abeb3e57409262ae5b751f60747921b33613e
+ACL Admin: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Deploying ACLManager...
+reusing "ACLManager" at 0x4826533b4897376654bb4d4ad88b7fafd0c98528
+ACLManager: 0x4826533b4897376654bb4d4ad88b7fafd0c98528
+Registering ACLManager...
+  - Broadcasting tx:
+      0x433d161eae040ef4281b00e54b55c4833e319c5eeb95ff7c33ad685a891de463
+      (type 0x2, maxFeePerGas: 821772, maxPriorityFeePerGas: 197083)
+Deploying Pool libraries...
+SupplyLogic artifact = true
+BorrowLogic artifact = true
+PoolLogic artifact = true
+reusing "SupplyLogic" at 0x0e801d84fa97b50751dbf25036d067dcf18858bf
+reusing "BorrowLogic" at 0x8f86403a4de0bb5791fa46b8e795c547942fe4cf
+reusing "LiquidationLogic" at 0x9d4454b023096f34b160d6b654540c56a1f81688
+reusing "FlashLoanLogic" at 0x5eb3bc0a489c5a8288765d2336659ebca68fcd00
+reusing "BridgeLogic" at 0x36c02da8a0983159322a80ffe9f24b1acff8b570
+reusing "EModeLogic" at 0x809d550fca64d94bd9f66e60752a544199cfac3d
+reusing "PoolLogic" at 0x4c5859f0f772848b2d91f1d83e2fe57935348029
+SupplyLogic: 0x0e801d84fa97b50751dbf25036d067dcf18858bf
+BorrowLogic: 0x8f86403a4de0bb5791fa46b8e795c547942fe4cf
+LiquidationLogic: 0x9d4454b023096f34b160d6b654540c56a1f81688
+FlashLoanLogic: 0x5eb3bc0a489c5a8288765d2336659ebca68fcd00
+BridgeLogic: 0x36c02da8a0983159322a80ffe9f24b1acff8b570
+EModeLogic: 0x809d550fca64d94bd9f66e60752a544199cfac3d
+PoolLogic: 0x4c5859f0f772848b2d91f1d83e2fe57935348029
+Deploying Pool implementation...
+reusing "PoolImpl" at 0x1291be112d480055dafd8a610b7d1e203891c274
+PoolImpl: 0x1291be112d480055dafd8a610b7d1e203891c274
+Registering Pool implementation...
+An unexpected error occurred:
+
+ProviderError: Transaction reverted without a reason string
+    at HttpProvider.request (E:\defi-lending-viction-main\packages\hardhat\node_modules\hardhat\src\internal\builtin-plugins\network-manager\http-provider.ts:146:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async AutomaticGasHandler.getMultipliedGasEstimation (E:\defi-lending-viction-main\packages\hardhat\node_modules\hardhat\src\internal\builtin-plugins\network-manager\request-handlers\handlers\gas\multiplied-gas-estimation.ts:29:30)
+    at async AutomaticGasHandler.handle (E:\defi-lending-viction-main\packages\hardhat\node_modules\hardhat\src\internal\builtin-plugins\network-manager\request-handlers\handlers\gas\automatic-gas-handler.ts:52:16)
+    at async Array.onRequest (E:\defi-lending-viction-main\packages\hardhat\node_modules\hardhat\src\internal\builtin-plugins\network-manager\hook-handlers\network.ts:72:38)
+    at async next (E:\defi-lending-viction-main\packages\hardhat\node_modules\hardhat\src\internal\core\hook-manager.ts:207:13)
+    at async HookManagerImplementation.runHandlerChain (E:\defi-lending-viction-main\packages\hardhat\node_modules\hardhat\src\internal\core\hook-manager.ts:213:12)
+    at async HttpProvider.request (E:\defi-lending-viction-main\packages\hardhat\node_modules\hardhat\src\internal\builtin-plugins\network-manager\http-provider.ts:137:25)
+    at async TransactionHashTrackerProvider._request (E:\defi-lending-viction-main\packages\hardhat\node_modules\@rocketh\core\src\providers\TransactionHashTracker.ts:16:20)
+    at async broadcastTransaction (E:\defi-lending-viction-main\packages\hardhat\node_modules\rocketh\src\environment\index.ts:846:20) {
+  code: 3,
+  data: '0x'
+}
+
+If you think this is a bug in Hardhat, please report it here: https://hardhat.org/report-bug
+npm error Lifecycle script `deploy` failed with error:
+npm error code 1
+npm error path E:\defi-lending-viction-main\packages\hardhat
+npm error workspace @se-2/hardhat@0.0.1
+npm error location E:\defi-lending-viction-main\packages\hardhat
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c hardhat compile && tsx scripts/runHardhatDeployWithPK.ts --network localhost

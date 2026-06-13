@@ -1,0 +1,11 @@
+node_modules
+.next
+.env
+cache
+artifacts
+typechain-types
+coverage
+dist
+packages/nextjs/.next
+packages/hardhat/cache
+packages/hardhat/artifacts
