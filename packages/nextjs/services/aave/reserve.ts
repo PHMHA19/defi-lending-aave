@@ -351,16 +351,8 @@ export async function getAllReserveData() {
   /**
    * Limit reserves for localhost performance
    */
-  const limitedReserves =
-    reserveAddresses.slice(
-      0,
-      2,
-    );
-  
-
-
   return Promise.all(
-    limitedReserves.map(
+  reserveAddresses.map(
       async asset => {
         /**
          * Load token metadata
@@ -428,16 +420,9 @@ getUserPositions(
    * Limit reserves
    * for localhost performance
    */
-  const limitedReserves =
-    reserveAddresses.slice(
-      0,
-      8,
-    );
-
-
   const positions =
-    await Promise.all(
-      limitedReserves.map(
+  await Promise.all(
+    reserveAddresses.map(
 
       async asset => {
         /**

@@ -1,5 +1,5 @@
 {
-  "address": "0x064d3595c126e559a0fb6d10d991e91aaae6f1eb",
+  "address": "0xff61ea29f7625f8e1ddd48b00c0c59627493c4b4",
   "abi": [
     {
       "inputs": [
@@ -913,15 +913,15 @@
     "notice": "Peripheral contract to collect and pre-process information from the Pool.",
     "version": 1
   },
-  "argsData": "0x000000000000000000000000bdf774c46ef0e4adf1747cb6206e8f7ec0397c05",
+  "argsData": "0x000000000000000000000000485ccefbd0cbffd4376b8610e10b6f99fa02f8f6",
   "transaction": {
-    "hash": "0xc6acd24a4ff9b353679ed519313bb3fe2e9c96f5693d6dd0a5ddd4763c97364d",
-    "nonce": "0xce",
+    "hash": "0x1aa22cf23c274db7400eb0ffe8a26910912de15a3a8fc808dea1a4e621d3a66c",
+    "nonce": "0x131",
     "origin": "0xe55d6fbfd2da1562187bbc5b874a070a490f410b"
   },
   "receipt": {
-    "blockHash": "0xda38bf87f56330ee8f3cd12cef81fca5c1ab8f60f4fd9d4c18e7cd9e4fa7cb35",
-    "blockNumber": "0xa87a27",
-    "transactionIndex": "0x7c"
+    "blockHash": "0x71465d324b41329f81fb59fe60b15935e30821c93271eab3fc258c2590387119",
+    "blockNumber": "0xa8a101",
+    "transactionIndex": "0xa5"
   }
 }

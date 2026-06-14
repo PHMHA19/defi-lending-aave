@@ -1,5 +1,5 @@
 {
-  "address": "0xe61e15af873ed4a162ca2282413404cf09805748",
+  "address": "0xc0c3e4bd9d918e2a7c4ae2dedd59291f3c97efc6",
   "abi": [
     {
       "anonymous": false,
@@ -1928,16 +1928,16 @@
   },
   "argsData": "0x",
   "libraries": {
-    "ConfiguratorLogic": "0x9fe27ab45979edea9c39916f96b58fbda2f28ef5"
+    "ConfiguratorLogic": "0x964e3202cb5943653ca4f5d2851c4961ad380a4b"
   },
   "transaction": {
-    "hash": "0x694c4785371dc4879c9f63ef91671366e5f664509d25380a011536ed6c94138f",
-    "nonce": "0xc4",
+    "hash": "0x326f3228d59bbf1beb1708f51a7cad967d522b848c692645ac984b65e05500ab",
+    "nonce": "0x127",
     "origin": "0xe55d6fbfd2da1562187bbc5b874a070a490f410b"
   },
   "receipt": {
-    "blockHash": "0x9c8a1b782208334ce8e0082575738c76793a01cf0083681173e7fcf43f1488fe",
-    "blockNumber": "0xa87a1d",
-    "transactionIndex": "0x5f"
+    "blockHash": "0x9ebd363aa8cb2cc4c017a789300d0cbb063bca126b9e7edac227542115574c9d",
+    "blockNumber": "0xa8a0f7",
+    "transactionIndex": "0x9a"
   }
 }

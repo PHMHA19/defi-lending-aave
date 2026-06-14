@@ -62,6 +62,7 @@ export async function supplyAsset(
         userAddress,
         0,
       ],
+      gas: 800000n,
     },
   );
 }
@@ -184,6 +185,7 @@ borrowAsset(
 
         userAddress,
       ],
+      gas: 800000n,
     },
   );
 }
@@ -219,6 +221,7 @@ withdrawAsset(
 
         userAddress,
       ],
+      gas: 800000n,
     },
   );
 }
@@ -259,6 +262,7 @@ repayAsset(
 
         userAddress,
       ],
+      gas: 800000n,
     },
   );
 }

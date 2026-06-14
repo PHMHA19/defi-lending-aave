@@ -1,14 +1,21 @@
+import deployedContracts from "~~/contracts/deployedContracts";
+
+const chainId = 11155111;
+
 export const AAVE_POOL =
-  "0x15EF4713523dd5122B14cEef94818441e93D74a9" as const;
+  "0x2034e6b7034961A4425e749b209E1EE14ED605Dc";
 
 export const AAVE_ORACLE =
-  "0x230149ad79b4a189734af0602fd9fc034c576402" as const;
+  deployedContracts[chainId]
+    .AaveOracle.address;
 
 export const AAVE_POOL_DATA_PROVIDER =
-  "0x064d3595c126e559a0fb6d10d991e91aaae6f1eb";
+  deployedContracts[chainId]
+    .AaveProtocolDataProvider
+    .address;
 
 export const AAVE_UI_POOL_DATA_PROVIDER =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0x0000000000000000000000000000000000000000";
 
 export const AAVE_WETH_GATEWAY =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0x0000000000000000000000000000000000000000";

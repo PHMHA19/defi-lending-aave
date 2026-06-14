@@ -6,6 +6,7 @@ import type {
 import {
   formatAPY,
   formatTokenAmount,
+  formatLTV,
 } from "~~/utils/aaveFormat";
 
 
@@ -58,6 +59,10 @@ MarketsTable({
 
               <th>
                 Price
+              </th>
+
+              <th className="text-center">
+                LTV
               </th>
 
               <th>
@@ -119,6 +124,12 @@ MarketsTable({
                         8,
                       ),
                     ).toFixed(2)}
+                  </td>
+
+                  <td className="text-center font-semibold text-cyan-400">
+                    {formatLTV(
+                      reserve.ltv,
+                    )}%
                   </td>
 
                   <td>

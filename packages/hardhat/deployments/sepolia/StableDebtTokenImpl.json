@@ -1,5 +1,5 @@
 {
-  "address": "0x8ef8f78a641ec0da20b02ae2b280dfa34f886e08",
+  "address": "0x403b95ad0f6d188f050011be76c729ffe5345d37",
   "abi": [
     {
       "inputs": [
@@ -1528,15 +1528,15 @@
     "notice": "Implements a stable debt token to track the borrowing positions of users at stable rate mode",
     "version": 1
   },
-  "argsData": "0x00000000000000000000000015ef4713523dd5122b14ceef94818441e93d74a9",
+  "argsData": "0x0000000000000000000000002034e6b7034961a4425e749b209e1ee14ed605dc",
   "transaction": {
-    "hash": "0x2943673296baa121e3e5e9dbf8e35d6ba772bd63b5b897a951bcfbcf63d6bc52",
-    "nonce": "0xc9",
+    "hash": "0x015c8a9df0e95df3656b820fed32eb0188579e5573f59c2d95f5cb51914da632",
+    "nonce": "0x12c",
     "origin": "0xe55d6fbfd2da1562187bbc5b874a070a490f410b"
   },
   "receipt": {
-    "blockHash": "0xaf1695fc4161c9583c281962a349ef60bcba6a60dc6b305d1b4dad31a578ab97",
-    "blockNumber": "0xa87a22",
-    "transactionIndex": "0x7f"
+    "blockHash": "0x4cf724eda4f1504b33d2f4e64ca0f003e36de55677e69f1dcdd9036cdd30dd31",
+    "blockNumber": "0xa8a0fc",
+    "transactionIndex": "0xd6"
   }
 }

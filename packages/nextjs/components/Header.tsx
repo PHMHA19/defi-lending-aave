@@ -9,7 +9,7 @@ import { hardhat } from "viem/chains";
 
 import {
   Bars3Icon,
-  BugAntIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -35,9 +35,9 @@ export const menuLinks: HeaderMenuLink[] = [
   },
 
   {
-    label: "Hợp đồng thông minh",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
+    label: "Giao thức cho vay",
+    href: "/lending",
+    icon: <BanknotesIcon className="h-4 w-4" />,
   },
 ];
 
@@ -154,7 +154,7 @@ export const Header = () => {
           <div className="flex flex-col">
 
             <span className="font-bold leading-tight">
-              DeFi Lending Viction
+              DeFi Lending
             </span>
 
             <span className="text-xs">

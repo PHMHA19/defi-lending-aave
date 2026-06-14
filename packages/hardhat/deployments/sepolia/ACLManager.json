@@ -1,5 +1,5 @@
 {
-  "address": "0xb9aab60bac380160fc948f38754692fba3d6678e",
+  "address": "0xd221c860da8ee3276d581e8bab751fb35ef034cc",
   "abi": [
     {
       "inputs": [
@@ -1009,15 +1009,15 @@
     "notice": "Access Control List Manager. Main registry of system roles and permissions.",
     "version": 1
   },
-  "argsData": "0x000000000000000000000000bdf774c46ef0e4adf1747cb6206e8f7ec0397c05",
+  "argsData": "0x000000000000000000000000485ccefbd0cbffd4376b8610e10b6f99fa02f8f6",
   "transaction": {
-    "hash": "0x676962a3914e3f7beddcd87857265d511f894893121669a461b5d1d91fe3446b",
-    "nonce": "0xb5",
+    "hash": "0x095f70e78d4290ecb9e434e559ac9861d389f44c8335db3c7bd7d17111e2cfc0",
+    "nonce": "0x118",
     "origin": "0xe55d6fbfd2da1562187bbc5b874a070a490f410b"
   },
   "receipt": {
-    "blockHash": "0x39d4f3a08c69b4f96e897bae4736cd42f2c48b39486336590a850b45f8eacf02",
-    "blockNumber": "0xa87a0d",
-    "transactionIndex": "0x92"
+    "blockHash": "0x5f3f814dc45b982794c04fe6aabcdb984213b0e8b05c92bb1ea9561565a10aae",
+    "blockNumber": "0xa8a0e8",
+    "transactionIndex": "0x91"
   }
 }

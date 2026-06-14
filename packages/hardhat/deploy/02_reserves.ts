@@ -148,16 +148,16 @@ export default deployScript(
               incentivesController:
                 "0x0000000000000000000000000000000000000000",
 
-              aTokenName: "Aave Viction USDC",
+              aTokenName: "Aave USDC",
               aTokenSymbol: "aUSDC",
 
               variableDebtTokenName:
-                "Aave Viction Variable Debt USDC",
+                "Aave Variable Debt USDC",
               variableDebtTokenSymbol:
                 "variableDebtUSDC",
 
               stableDebtTokenName:
-                "Aave Viction Stable Debt USDC",
+                "Aave Stable Debt USDC",
               stableDebtTokenSymbol:
                 "stableDebtUSDC",
 

@@ -143,19 +143,19 @@ export default deployScript(
                 "0x0000000000000000000000000000000000000000",
 
               aTokenName:
-                "Aave Viction WETH",
+                "Aave WETH",
 
               aTokenSymbol:
                 "aWETH",
 
               variableDebtTokenName:
-                "Aave Viction Variable Debt WETH",
+                "Aave Variable Debt WETH",
 
               variableDebtTokenSymbol:
                 "variableDebtWETH",
 
               stableDebtTokenName:
-                "Aave Viction Stable Debt WETH",
+                "Aave Stable Debt WETH",
 
               stableDebtTokenSymbol:
                 "stableDebtWETH",
@@ -190,7 +190,7 @@ export default deployScript(
 
         args: [
           weth.address,
-          8000n,
+          8250n,
           8500n,
           10500n,
         ],

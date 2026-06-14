@@ -11,7 +11,15 @@ import {
 } from "wagmi";
 
 import { writeContract } from "@wagmi/core";
+import {
+  waitForTransactionReceipt,
+} from "@wagmi/core";
+
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
+
+import {
+  getReservesList,
+} from "~~/services/aave/pool";
 
 import {
   approveAsset,
@@ -43,10 +51,8 @@ import type {
 
 
 import {
-  formatAPY,
   formatHealthFactor,
   formatLTV,
-  formatTokenAmount,
   formatUSD,
 } from "~~/utils/aaveFormat";
 
@@ -133,42 +139,100 @@ export default function TestPage() {
 
 
   const handleFaucetUSDC = async () => {
-  try {
-    await writeContract(
-      wagmiConfig,
-      {
-        address:
-          "0x7f3735a03abb628a11996755eacc43f044e0a640",
-        abi: faucetAbi,
-        functionName: "mint",
-        args: [10000n * 10n ** 6n],
-      },
-    );
+    try {
+      const reserves =
+        await getReservesList();
 
-    alert("Minted 10,000 mUSDC");
+      const usdc =
+        reserves[0];
 
-    await loadReserves();
-  } catch (err) {
-    console.error(err);
-  }
-};
+      const hash =
+        await writeContract(
+          wagmiConfig,
+          {
+            address: usdc,
+            abi: faucetAbi,
+            functionName: "mint",
+            args: [
+              10000n *
+              10n ** 6n,
+            ],
+          },
+        );
+
+      const receipt =
+        await waitForTransactionReceipt(
+          wagmiConfig,
+          {
+            hash,
+          },
+        );
+
+      if (
+        receipt.status !==
+        "success"
+      ) {
+        throw new Error(
+          "Mint failed",
+        );
+      }
+
+      alert(
+        "Minted 10,000 mUSDC",
+      );
+
+      await loadReserves();
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
 const handleFaucetWETH = async () => {
   try {
-    await writeContract(
-      wagmiConfig,
-      {
-        address:
-          "0xc63a3d0c6381fe146d6955927501c6d8b03ebddd",
-        abi: faucetAbi,
-        functionName: "mint",
-        args: [10n * 10n ** 18n],
-      },
+    const reserves =
+      await getReservesList();
+
+    const weth =
+      reserves[1];
+
+    const hash =
+      await writeContract(
+        wagmiConfig,
+        {
+          address: weth,
+          abi: faucetAbi,
+          functionName: "mint",
+          args: [
+            10n *
+            10n ** 18n,
+          ],
+        },
+      );
+
+    const receipt =
+      await waitForTransactionReceipt(
+        wagmiConfig,
+        {
+          hash,
+        },
+      );
+
+    if (
+      receipt.status !==
+      "success"
+    ) {
+      throw new Error(
+        "Mint failed",
+      );
+    }
+
+    alert(
+      "Minted 10 WETH",
     );
 
-    alert("Minted 10 WETH");
-
     await loadReserves();
+
   } catch (err) {
     console.error(err);
   }
@@ -423,11 +487,29 @@ const [
       /**
        * Approve
        */
-      await approveAsset(
-        selectedAsset
-,
-        amount,
-      );
+      const approveHash =
+        await approveAsset(
+          selectedAsset,
+          amount,
+        );
+
+      const approveReceipt =
+        await waitForTransactionReceipt(
+          wagmiConfig,
+          {
+            hash: approveHash,
+          },
+        );
+
+      if (
+        approveReceipt.status !==
+        "success"
+      ) {
+        throw new Error(
+          "Approve failed",
+        );
+      }
+      
 
       console.log(
         "Approve success",
@@ -436,11 +518,35 @@ const [
       /**
        * Supply
        */
-      await supplyAsset(
-        selectedAsset,
-        amount,
-        userAddress,
-      );
+      const hash =
+        await supplyAsset(
+          selectedAsset,
+          amount,
+          userAddress,
+        );
+
+      const receipt =
+        await waitForTransactionReceipt(
+          wagmiConfig,
+          {
+            hash,
+          },
+        );
+
+        console.log(
+          "SUPPLY RECEIPT",
+          receipt,
+        );
+
+
+      if (
+        receipt.status !==
+        "success"
+      ) {
+        throw new Error(
+          "Supply failed",
+        );
+      }
 
       console.log(
         "Supply success",
@@ -516,6 +622,27 @@ const [
       return;
     }
 
+    const assetPrice =
+      Number(
+        selectedReserve.price,
+      ) / 1e8;
+
+    if (
+      Number.isNaN(assetPrice) ||
+      assetPrice <= 0
+    ) {
+      alert(
+        "Invalid asset price",
+      );
+
+      return;
+    }
+
+    const borrowValueUsd =
+      parsedAmount *
+      assetPrice;
+
+
     const availableBorrows =
       Number(
         accountData
@@ -523,25 +650,48 @@ const [
       );
 
     if (
-      parsedAmount >
+      borrowValueUsd  >
       availableBorrows
     ) {
       alert(
-        "Borrow amount exceeds limit",
-      );
+      `Borrow exceeds limit.
+  Requested: $${borrowValueUsd.toFixed(2)}
+  Available: $${availableBorrows.toFixed(2)}`
+  );
 
       return;
     }
    
 
     try {
-      await borrowAsset(
-        borrowAssetAddress,
+      const hash =
+        await borrowAsset(
+          borrowAssetAddress,
+          amount,
+          address as `0x${string}`,
+        );
 
-        amount,
+      const receipt =
+        await waitForTransactionReceipt(
+          wagmiConfig,
+          {
+            hash,
+          },
+        );
 
-        address as `0x${string}`,
+      console.log(
+        "BORROW RECEIPT",
+        receipt,
       );
+
+      if (
+        receipt.status !==
+        "success"
+      ) {
+        throw new Error(
+          "Borrow failed",
+        );
+      }
 
       alert(
         "Borrow success",
@@ -628,13 +778,34 @@ const [
     }
 
     try {
-      await withdrawAsset(
-        withdrawAssetAddress,
+      const hash =
+        await withdrawAsset(
+          withdrawAssetAddress,
+          amount,
+          address as `0x${string}`,
+        );
 
-        amount,
+      const receipt =
+        await waitForTransactionReceipt(
+          wagmiConfig,
+          {
+            hash,
+          },
+        );
 
-        address as `0x${string}`,
+      console.log(
+        "WITHDRAW RECEIPT",
+        receipt,
       );
+
+      if (
+        receipt.status !==
+        "success"
+      ) {
+        throw new Error(
+          "Withdraw failed",
+        );
+      }
 
       alert(
         "Withdraw success",
@@ -757,25 +928,62 @@ const [
         allowance < amount
       ) {
 
-        await approveAsset(
-          repayAssetAddress,
+        const approveHash =
+          await approveAsset(
+            repayAssetAddress,
+            amount,
+          );
 
-          amount,
-        );
+        const approveReceipt =
+          await waitForTransactionReceipt(
+            wagmiConfig,
+            {
+              hash: approveHash,
+            },
+          );
+
+        if (
+          approveReceipt.status !==
+          "success"
+        ) {
+          throw new Error(
+            "Approve failed",
+          );
+          }
       }
 
-      await repayAsset(
-        repayAssetAddress,
+      const hash =
+        await repayAsset(
+          repayAssetAddress,
+          amount,
+          address as `0x${string}`,
+        );
 
-        amount,
-
-        address as `0x${string}`,
+      const receipt =
+        await waitForTransactionReceipt(
+          wagmiConfig,
+          {
+            hash,
+          },
+        );
+      
+      console.log(
+        "REPAY RECEIPT",
+        receipt,
       );
+
+      if (
+        receipt.status !==
+        "success"
+      ) {
+        throw new Error(
+          "Repay failed",
+        );
+      }
 
       alert(
         "Repay success",
       );
-
       await loadAccountData();
 
       await loadReserves();
