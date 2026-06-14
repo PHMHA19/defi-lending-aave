@@ -1,17 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useAccount, useChainId } from "wagmi";
 import { isAddress, getAddress, type Address } from "viem";
 import {
   getLiquidationPreview,
-  isLiquidatable,
   liquidationCallAndWait,
   parseTokenAmount,
-  formatHealthFactor,
 } from "~~/services/aave/liquidation";
-import { deployedContracts } from "~~/contracts/deployedContracts";
-import { Input, InputNumber, Button } from "~~/components/AntdComponents";
+import deployedContracts from "~~/contracts/deployedContracts";
+const Input = (props: any) => (
+  <input
+    {...props}
+    className="input input-bordered w-full text-black"
+  />
+);
+
+const InputNumber = (props: any) => (
+  <input
+    type="number"
+    {...props}
+    className="input input-bordered w-full text-black"
+  />
+);
+
+const Button = ({ children, ...props }: any) => (
+  <button
+    {...props}
+    className="btn btn-primary"
+  >
+    {children}
+  </button>
+);
 
 type PreviewState = Awaited<ReturnType<typeof getLiquidationPreview>> | null;
 
@@ -31,9 +51,8 @@ export default function LiquidationPage() {
   const chainId = useChainId();
 
   const chainDeployment = useMemo(() => {
-    const record = (deployedContracts as any)?.[chainId] ?? (deployedContracts as any)?.[31337] ?? {};
-    return record;
-  }, [chainId]);
+    return (deployedContracts as any)?.[chainId] ?? {};
+    }, [chainId]);
 
   const defaultCollateral = useMemo(() => {
     return safeAddress(chainDeployment?.WETH ?? chainDeployment?.weth ?? chainDeployment?.collateralAsset);
@@ -42,13 +61,23 @@ export default function LiquidationPage() {
   const defaultDebt = useMemo(() => {
     return safeAddress(chainDeployment?.USDC ?? chainDeployment?.usdc ?? chainDeployment?.debtAsset);
   }, [chainDeployment]);
-
+    
   const [borrower, setBorrower] = useState("");
   const [collateralAsset, setCollateralAsset] = useState<Address | "">(defaultCollateral);
   const [debtAsset, setDebtAsset] = useState<Address | "">(defaultDebt);
   const [debtToCoverHuman, setDebtToCoverHuman] = useState("0");
   const [receiveAToken, setReceiveAToken] = useState(false);
+  
+  useEffect(() => {
+    if (defaultCollateral) {
+        setCollateralAsset(defaultCollateral);
+    }
 
+    if (defaultDebt) {
+        setDebtAsset(defaultDebt);
+    }
+    }, [defaultCollateral, defaultDebt]);
+    
   const [preview, setPreview] = useState<PreviewState>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -63,7 +92,8 @@ export default function LiquidationPage() {
     isAddress(collateralAsset) &&
     isAddress(debtAsset) &&
     Number(debtToCoverHuman) > 0 &&
-    (!preview || preview.isLiquidatable || isLiquidatable(preview.accountData.healthFactor));
+    preview !== null &&
+    preview.isLiquidatable;
 
   const fillDefaults = () => {
     if (defaultCollateral) setCollateralAsset(defaultCollateral);
@@ -140,9 +170,7 @@ export default function LiquidationPage() {
 
       const hash =
         typeof receipt?.transactionHash === "string"
-          ? receipt.transactionHash
-          : typeof receipt?.hash === "string"
-            ? receipt.hash
+            ? receipt.transactionHash
             : "";
 
       if (hash) setTxHash(hash);
@@ -246,10 +274,10 @@ export default function LiquidationPage() {
               </div>
 
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <Button type="primary" onClick={handleLoadPreview} disabled={!canPreview || loadingPreview}>
-                  {loadingPreview ? "Đang tải..." : "Lấy dữ liệu vị thế"}
+                <Button onClick={handleLoadPreview} disabled={!canPreview || loadingPreview}>
+                 {loadingPreview ? "Đang tải..." : "Lấy dữ liệu vị thế"}
                 </Button>
-                <Button type="default" onClick={fillDefaults}>
+                <Button onClick={fillDefaults}>
                   Nạp WETH / USDC mặc định
                 </Button>
               </div>
@@ -304,6 +332,7 @@ export default function LiquidationPage() {
                 <div>• Health Factor phải &lt; 1 thì mới thanh lý được.</div>
                 <div>• Debt amount nhập theo đơn vị gốc của debt asset.</div>
                 <div>• File service sẽ tự approve trước khi gọi liquidationCall.</div>
+                <div>• Collateral asset và Debt asset phải đúng với vị thế của borrower.</div>
               </div>
             </div>
           </section>
@@ -375,7 +404,7 @@ export default function LiquidationPage() {
 
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <Button
-                  type="primary"
+                
                   onClick={handleLiquidation}
                   disabled={!canLiquidate || submitting}
                 >
@@ -383,7 +412,7 @@ export default function LiquidationPage() {
                 </Button>
 
                 <Button
-                  type="default"
+                  
                   onClick={() => {
                     setError("");
                     setStatus("");

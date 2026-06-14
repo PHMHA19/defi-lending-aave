@@ -198,5 +198,33 @@ export const poolAbi = [
       },
     ],
   },
+  {
+    type: "function",
+    name: "liquidationCall",
+    stateMutability: "nonpayable",
+    inputs: [
+      {
+        name: "collateralAsset",
+        type: "address",
+      },
+      {
+        name: "debtAsset",
+        type: "address",
+      },
+      {
+        name: "user",
+        type: "address",
+      },
+      {
+        name: "debtToCover",
+        type: "uint256",
+      },
+      {
+        name: "receiveAToken",
+        type: "bool",
+      },
+    ],
+    outputs: [],
+  },
 
 ] as const;

@@ -9,22 +9,23 @@ import {
   erc20Abi,
   formatUnits,
   getAddress,
-  isAddress,
   parseUnits,
   type Address,
   type Hex,
 } from "viem";
+import {
+  AAVE_POOL,
+  AAVE_POOL_DATA_PROVIDER,
+} from "./addresses";
 import { poolAbi } from "./poolAbi";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
-import { deployedContracts } from "~~/contracts/deployedContracts";
 
-const FALLBACK_CHAIN_ID = 31337;
+const FALLBACK_CHAIN_ID = 11155111;
 const HEALTH_FACTOR_DECIMALS = 18;
 const BASE_CURRENCY_DECIMALS = 8;
 
 export const MAX_UINT256: bigint = (1n << 256n) - 1n;
 
-type DeploymentRecord = Record<string, unknown>;
 
 export type UserAccountData = {
   totalCollateralBase: bigint;
@@ -81,59 +82,25 @@ const poolDataProviderAbi = [
   },
 ] as const;
 
-function getDeployments(): Record<string, DeploymentRecord> {
-  return deployedContracts as unknown as Record<string, DeploymentRecord>;
-}
+type SupportedChainId = 11155111;
 
-function resolveChainId(chainIdOverride?: number): number {
-  if (typeof chainIdOverride === "number") return chainIdOverride;
+function resolveChainId(
+  chainIdOverride?: number,
+): SupportedChainId {
+
+  if (chainIdOverride === 11155111) {
+    return 11155111;
+  }
 
   try {
     const current = getChainId(wagmiConfig);
-    if (typeof current === "number" && Number.isFinite(current)) return current;
-  } catch {
-    // ignore and fall back
-  }
 
-  return FALLBACK_CHAIN_ID;
-}
-
-function resolveDeployment(chainId: number): DeploymentRecord {
-  const deployments = getDeployments();
-  const record = deployments[String(chainId)] ?? (deployments as Record<number, DeploymentRecord>)[chainId];
-  if (!record) {
-    throw new Error(`Không tìm thấy deployedContracts cho chainId=${chainId}`);
-  }
-  return record;
-}
-
-function resolveAddress(chainId: number, keys: string[]): Address {
-  const deployment = resolveDeployment(chainId);
-
-  for (const key of keys) {
-    const value = deployment[key];
-    if (typeof value === "string" && isAddress(value)) {
-      return getAddress(value);
+    if (current === 11155111) {
+      return 11155111;
     }
-  }
+  } catch {}
 
-  throw new Error(
-    `Không tìm thấy địa chỉ hợp đồng trong deployedContracts cho chainId=${chainId}. ` +
-      `Đã thử các key: ${keys.join(", ")}`
-  );
-}
-
-function resolvePoolAddress(chainId: number): Address {
-  return resolveAddress(chainId, ["pool", "Pool"]);
-}
-
-function resolveDataProviderAddress(chainId: number): Address {
-  return resolveAddress(chainId, [
-    "protocolDataProvider",
-    "poolDataProvider",
-    "aaveProtocolDataProvider",
-    "dataProvider",
-  ]);
+  return 11155111;
 }
 
 function normalizeUserAccountData(raw: unknown): UserAccountData {
@@ -145,7 +112,7 @@ function normalizeUserAccountData(raw: unknown): UserAccountData {
       currentLiquidationThreshold,
       ltv,
       healthFactor,
-    ] = raw as readonly [bigint, bigint, bigint, bigint, bigint, bigint];
+    ] = raw as unknown as readonly[bigint, bigint, bigint, bigint, bigint, bigint];
 
     return {
       totalCollateralBase: BigInt(totalCollateralBase),
@@ -180,7 +147,7 @@ function normalizeUserReserveData(raw: unknown): UserReserveData {
       liquidityRate,
       stableRateLastUpdated,
       usageAsCollateralEnabled,
-    ] = raw as readonly [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, boolean];
+    ] = raw as unknown as readonly [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, boolean];
 
     return {
       currentATokenBalance: BigInt(currentATokenBalance),
@@ -219,13 +186,14 @@ export function formatHealthFactor(healthFactor: bigint): string {
 
 export async function getTokenDecimals(tokenAddress: Address, chainId?: number): Promise<number> {
   const resolvedChainId = resolveChainId(chainId);
+  const decimals = await readContract(wagmiConfig, {
+  address: tokenAddress,
+  abi: erc20Abi,
+  functionName: "decimals",
+  chainId: resolvedChainId,
+});
 
-  return await readContract(wagmiConfig, {
-    address: tokenAddress,
-    abi: erc20Abi,
-    functionName: "decimals",
-    chainId: resolvedChainId,
-  });
+return Number(decimals);
 }
 
 export async function parseTokenAmount(
@@ -251,7 +219,7 @@ export async function getUserAccountData(
   chainId?: number
 ): Promise<UserAccountData> {
   const resolvedChainId = resolveChainId(chainId);
-  const poolAddress = resolvePoolAddress(resolvedChainId);
+  const poolAddress = AAVE_POOL as Address;
 
   const raw = await readContract(wagmiConfig, {
     address: poolAddress,
@@ -270,7 +238,7 @@ export async function getUserReserveData(
   chainId?: number
 ): Promise<UserReserveData> {
   const resolvedChainId = resolveChainId(chainId);
-  const dataProviderAddress = resolveDataProviderAddress(resolvedChainId);
+  const dataProviderAddress = AAVE_POOL_DATA_PROVIDER as Address;
 
   const raw = await readContract(wagmiConfig, {
     address: dataProviderAddress,
@@ -307,7 +275,7 @@ export async function approveAsset(
   chainId?: number
 ): Promise<Hex> {
   const resolvedChainId = resolveChainId(chainId);
-  const spender = spenderAddress ?? resolvePoolAddress(resolvedChainId);
+  const spender = spenderAddress ??(AAVE_POOL as Address);
   const account = getAccount(wagmiConfig);
 
   if (!account.address) {
@@ -339,7 +307,7 @@ export async function liquidationCallRaw(
   chainId?: number
 ): Promise<Hex> {
   const resolvedChainId = resolveChainId(chainId);
-  const poolAddress = resolvePoolAddress(resolvedChainId);
+  const poolAddress = AAVE_POOL as Address;
 
   return await writeContract(wagmiConfig, {
     address: poolAddress,
@@ -358,13 +326,35 @@ export async function liquidationCallRaw(
 
 export async function liquidationCall(params: LiquidationParams): Promise<Hex> {
   const resolvedChainId = resolveChainId(params.chainId);
-  const poolAddress = resolvePoolAddress(resolvedChainId);
+  const poolAddress = AAVE_POOL as Address;
 
   if (params.debtToCover <= 0n) {
     throw new Error("Số tiền thanh lý phải lớn hơn 0.");
   }
 
   const accountData = await getUserAccountData(params.user, resolvedChainId);
+  const reserveData =
+    await getUserReserveData(
+        params.debtAsset,
+        params.user,
+        resolvedChainId
+    );
+
+    const totalDebt =
+    reserveData.currentStableDebt +
+    reserveData.currentVariableDebt;
+
+    if (totalDebt === 0n) {
+    throw new Error(
+        "Người dùng không có khoản nợ ở tài sản này."
+    );
+    }
+
+    if (params.debtToCover > totalDebt) {
+    throw new Error(
+        "debtToCover vượt quá khoản nợ hiện tại."
+    );
+    }
   if (!params.skipHealthFactorCheck && !isLiquidatable(accountData.healthFactor)) {
     throw new Error(
       `Vị thế chưa đủ điều kiện thanh lý. Health Factor hiện tại = ${formatHealthFactor(
@@ -423,7 +413,6 @@ export async function getLiquidationPreview(
 }> {
   const resolvedChainId = resolveChainId(chainId);
   const accountData = await getUserAccountData(userAddress, resolvedChainId);
-
   return {
     chainId: resolvedChainId,
     accountData,
