@@ -4247,6 +4247,7 @@ const deployedContracts = {
       inheritedFunctions: {},
       deployedOnBlock: 11051267,
     },
+    
     PoolAddressesProvider: {
       address: "0x485ccefbd0cbffd4376b8610e10b6f99fa02f8f6",
       abi: [

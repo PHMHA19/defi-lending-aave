@@ -14,9 +14,10 @@ import {
   type Hex,
 } from "viem";
 import {
-  AAVE_POOL,
   AAVE_POOL_DATA_PROVIDER,
 } from "./addresses";
+
+import { getPoolAddress } from "./provider";
 import { poolAbi } from "./poolAbi";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
@@ -219,7 +220,7 @@ export async function getUserAccountData(
   chainId?: number
 ): Promise<UserAccountData> {
   const resolvedChainId = resolveChainId(chainId);
-  const poolAddress = AAVE_POOL as Address;
+  const poolAddress = await getPoolAddress();
 
   const raw = await readContract(wagmiConfig, {
     address: poolAddress,
@@ -275,7 +276,7 @@ export async function approveAsset(
   chainId?: number
 ): Promise<Hex> {
   const resolvedChainId = resolveChainId(chainId);
-  const spender = spenderAddress ??(AAVE_POOL as Address);
+  const spender = spenderAddress ?? await getPoolAddress();
   const account = getAccount(wagmiConfig);
 
   if (!account.address) {
@@ -307,7 +308,7 @@ export async function liquidationCallRaw(
   chainId?: number
 ): Promise<Hex> {
   const resolvedChainId = resolveChainId(chainId);
-  const poolAddress = AAVE_POOL as Address;
+  const poolAddress = await getPoolAddress();
 
   return await writeContract(wagmiConfig, {
     address: poolAddress,
@@ -326,7 +327,7 @@ export async function liquidationCallRaw(
 
 export async function liquidationCall(params: LiquidationParams): Promise<Hex> {
   const resolvedChainId = resolveChainId(params.chainId);
-  const poolAddress = AAVE_POOL as Address;
+  const poolAddress = await getPoolAddress();
 
   if (params.debtToCover <= 0n) {
     throw new Error("Số tiền thanh lý phải lớn hơn 0.");

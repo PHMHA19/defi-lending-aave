@@ -2,8 +2,10 @@ import deployedContracts from "~~/contracts/deployedContracts";
 
 const chainId = 11155111;
 
-export const AAVE_POOL =
-  "0x2034e6b7034961A4425e749b209E1EE14ED605Dc";
+export const AAVE_POOL_ADDRESSES_PROVIDER =
+  deployedContracts[chainId]
+    .PoolAddressesProvider
+    .address;
 
 export const AAVE_ORACLE =
   deployedContracts[chainId]

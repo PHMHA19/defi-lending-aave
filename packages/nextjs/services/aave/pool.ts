@@ -7,7 +7,7 @@ import { poolAbi } from "./poolAbi";
 
 import { erc20Abi } from "./erc20Abi";
 
-import {AAVE_POOL,} from "./addresses";
+import { getPoolAddress } from "./provider";
 import { getPublicClient } from "@wagmi/core";
 /**
  * Approve ERC20 token
@@ -16,6 +16,7 @@ export async function approveAsset(
   tokenAddress: `0x${string}`,
   amount: bigint,
 ) {
+  const poolAddress = await getPoolAddress();
   return writeContract(
     wagmiConfig,
     {
@@ -29,7 +30,7 @@ export async function approveAsset(
         "approve",
 
       args: [
-        AAVE_POOL,
+        poolAddress,
         amount,
       ],
     },
@@ -43,12 +44,12 @@ export async function supplyAsset(
   tokenAddress: `0x${string}`,
   amount: bigint,
   userAddress: `0x${string}`,
-) {
+) {const poolAddress = await getPoolAddress();
   return writeContract(
     wagmiConfig,
     {
       address:
-        AAVE_POOL,
+        poolAddress,
 
       abi:
         poolAbi,
@@ -73,7 +74,7 @@ export async function supplyAsset(
 export async function getAssetAllowance(
   tokenAddress: `0x${string}`,
   owner: `0x${string}`,
-) {
+) {const poolAddress = await getPoolAddress();
   return readContract(
     wagmiConfig,
     {
@@ -88,7 +89,7 @@ export async function getAssetAllowance(
 
       args: [
         owner,
-        AAVE_POOL,
+        poolAddress,
       ],
     },
   );
@@ -99,12 +100,12 @@ export async function getAssetAllowance(
  */
 export async function getUserAccountData(
   userAddress: `0x${string}`,
-) {
+) {const poolAddress = await getPoolAddress();
   return readContract(
     wagmiConfig,
     {
       address:
-        AAVE_POOL,
+        poolAddress,
 
       abi:
         poolAbi,
@@ -124,15 +125,11 @@ export async function getUserAccountData(
 export async function getReservesList() {
   const client = getPublicClient(wagmiConfig);
 
-  // console.log(
-  //   "USING POOL",
-  //   AAVE_POOL
-  // );
-
+  const poolAddress = await getPoolAddress();
   const result = await readContract(
     wagmiConfig,
     {
-      address: AAVE_POOL,
+      address: poolAddress,
       abi: poolAbi,
       functionName: "getReservesList",
     },
@@ -155,12 +152,12 @@ borrowAsset(
 
   userAddress:
     `0x${string}`,
-) {
+) {const poolAddress = await getPoolAddress();
   return writeContract(
     wagmiConfig,
     {
       address:
-        AAVE_POOL,
+        poolAddress,
 
       abi:
         poolAbi,
@@ -201,12 +198,12 @@ withdrawAsset(
 
   userAddress:
     `0x${string}`,
-) {
+) {const poolAddress = await getPoolAddress();
   return writeContract(
     wagmiConfig,
     {
       address:
-        AAVE_POOL,
+        poolAddress,
 
       abi:
         poolAbi,
@@ -237,12 +234,12 @@ repayAsset(
 
   userAddress:
     `0x${string}`,
-) {
+) {const poolAddress = await getPoolAddress();
   return writeContract(
     wagmiConfig,
     {
       address:
-        AAVE_POOL,
+        poolAddress,
 
       abi:
         poolAbi,
