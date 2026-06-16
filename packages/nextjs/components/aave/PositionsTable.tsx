@@ -12,13 +12,17 @@ import {
 } from "~~/components/aave/TokenIcon";
 
 type Props = {
-  userPositions:
-    UserReserveData[];
+  userPositions: UserReserveData[];
+
+  onToggleCollateral: (
+    asset: `0x${string}`,
+    enabled: boolean,
+  ) => Promise<void>;
 };
 
-export function
-PositionsTable({
+export function PositionsTable({
   userPositions,
+  onToggleCollateral,
 }: Props) {
 
   return (
@@ -107,18 +111,23 @@ PositionsTable({
                     </td>
 
                     <td>
-
-                      {position
-                        .usageAsCollateralEnabled ? (
-                        <div className="badge badge-success">
-                          Enabled
-                        </div>
-                      ) : (
-                        <div className="badge badge-error">
-                          Disabled
-                        </div>
-                      )}
-
+                      <button
+                        className={
+                          position.usageAsCollateralEnabled
+                            ? "btn btn-success btn-sm"
+                            : "btn btn-error btn-sm"
+                        }
+                        onClick={() =>
+                          onToggleCollateral(
+                            position.asset,
+                            !position.usageAsCollateralEnabled,
+                          )
+                        }
+                      >
+                        {position.usageAsCollateralEnabled
+                          ? "ON"
+                          : "OFF"}
+                      </button>
                     </td>
                   </tr>
                 ),

@@ -8,7 +8,7 @@ import { poolAbi } from "./poolAbi";
 import { erc20Abi } from "./erc20Abi";
 
 import { getPoolAddress } from "./provider";
-import { getPublicClient } from "@wagmi/core";
+import { simulateContract } from "@wagmi/core";
 /**
  * Approve ERC20 token
  */
@@ -123,7 +123,7 @@ export async function getUserAccountData(
 
 
 export async function getReservesList() {
-  const client = getPublicClient(wagmiConfig);
+  
 
   const poolAddress = await getPoolAddress();
   const result = await readContract(
@@ -137,7 +137,6 @@ export async function getReservesList() {
 
   return result as `0x${string}`[];
 }
-
 
 
 
@@ -264,7 +263,49 @@ repayAsset(
   );
 }
 
+export async function setCollateralUsage(
+  asset: `0x${string}`,
+  useAsCollateral: boolean,
+) {
+  const poolAddress =
+    await getPoolAddress();
 
+  return writeContract(
+    wagmiConfig,
+    {
+      address: poolAddress,
+      abi: poolAbi,
+      functionName:
+        "setUserUseReserveAsCollateral",
+      args: [
+        asset,
+        useAsCollateral,
+      ],
+      gas: 500000n,
+    },
+  );
+}
 
+export async function simulateCollateralUsage(
+  asset: `0x${string}`,
+  enabled: boolean,
+) {
+  const poolAddress =
+    await getPoolAddress();
+
+  return simulateContract(
+    wagmiConfig,
+    {
+      address: poolAddress,
+      abi: poolAbi,
+      functionName:
+        "setUserUseReserveAsCollateral",
+      args: [
+        asset,
+        enabled,
+      ],
+    },
+  );
+}
 
 

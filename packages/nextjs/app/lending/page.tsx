@@ -29,6 +29,8 @@ import {
   getAssetAllowance,
   getUserAccountData,
   supplyAsset,
+  setCollateralUsage,
+  simulateCollateralUsage,
 } from "~~/services/aave/pool";
 
 import {
@@ -110,7 +112,6 @@ import {
 import {
   WalletBalancesTable,
 } from "~~/components/aave/WalletBalancesTable";
-
 
 const faucetAbi = [
   {
@@ -828,6 +829,44 @@ const [
     }
   };
 
+  const handleToggleCollateral = async (
+    asset: `0x${string}`,
+    enabled: boolean,
+  ) => {
+    try {
+
+      // simulate trước
+      await simulateCollateralUsage(
+        asset,
+        enabled,
+      );
+
+      // chỉ khi simulate pass mới mở MetaMask
+      const hash =
+        await setCollateralUsage(
+          asset,
+          enabled,
+        );
+
+      await waitForTransactionReceipt(
+        wagmiConfig,
+        { hash },
+      );
+
+      await loadAccountData();
+      await loadReserves();
+
+    } catch (error: any) {
+      console.error(error);
+
+      alert(
+        enabled
+          ? "Không thể bật collateral."
+          : "Không thể tắt collateral vì tài sản này đang bảo đảm cho khoản vay hiện tại."
+      );
+    }
+  };
+
   
   const handleRepay =
     async () => {
@@ -852,6 +891,7 @@ const [
     ) {
       return;
     }
+
 
     const walletBalance =
       walletBalances.find(
@@ -1183,6 +1223,9 @@ const [
       <PositionsTable
         userPositions={
           userPositions
+        }
+        onToggleCollateral={
+          handleToggleCollateral
         }
       />
     </div>

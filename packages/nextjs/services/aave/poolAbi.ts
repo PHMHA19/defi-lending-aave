@@ -226,5 +226,21 @@ export const poolAbi = [
     ],
     outputs: [],
   },
+  {
+    type: "function",
+    name: "setUserUseReserveAsCollateral",
+    stateMutability: "nonpayable",
+    inputs: [
+      {
+        name: "asset",
+        type: "address",
+      },
+      {
+        name: "useAsCollateral",
+        type: "bool",
+      },
+    ],
+    outputs: [],
+  },
 
 ] as const;
