@@ -19,6 +19,8 @@ export type ReserveData = {
 
   liquidationThreshold: bigint;
 
+  liquidationBonus: bigint;
+  
   reserveFactor: bigint;
 
   usageAsCollateralEnabled: boolean;

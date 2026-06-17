@@ -237,6 +237,8 @@ function mapReserveData(
       normalizedConfigData
         .liquidationThreshold,
 
+    liquidationBonus: normalizedConfigData.liquidationBonus,
+
     reserveFactor:
       normalizedConfigData
         .reserveFactor,
