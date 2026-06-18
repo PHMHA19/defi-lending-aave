@@ -8,6 +8,7 @@ import {
 
 import {
   useAccount,
+  useChainId,
 } from "wagmi";
 
 import { writeContract } from "@wagmi/core";
@@ -137,6 +138,7 @@ export default function TestPage() {
   const {
     address,
   } = useAccount();
+  const chainId = useChainId();
 
 
   const handleFaucetUSDC = async () => {
@@ -698,16 +700,21 @@ const [
         "Borrow success",
       );
 
-      await fetch("/api/liquidation-watchlist", {
+      const syncResponse = await fetch("/api/liquidation-watchlist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          address: address,
+          address,
+          chainId,
           action: "add",
         }),
       });
+
+if (!syncResponse.ok) {
+  console.error("Failed to add borrower to shared watchlist");
+}
 
 await loadAccountData();
 
@@ -1056,16 +1063,21 @@ await loadReserves();
         );
 
       if (!stillHasDebt) {
-        await fetch("/api/liquidation-watchlist", {
+        const syncResponse = await fetch("/api/liquidation-watchlist", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             address,
+            chainId,
             action: "remove",
           }),
         });
+
+        if (!syncResponse.ok) {
+          console.error("Failed to remove borrower from shared watchlist");
+        }
       }
 
     } catch (

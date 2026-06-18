@@ -46,6 +46,7 @@ function shortAddress(address: string) {
 
 const BASE_PRICE_DECIMALS = 8;
 const CLOSE_FACTOR = 0.5;
+const LIQUIDATION_OPPORTUNITY_THRESHOLD = 1.1;
 
 function displaySymbol(symbol: string) {
   const s = symbol.toUpperCase();
@@ -347,6 +348,25 @@ export default function LiquidationPage() {
           ? "Vị thế đủ điều kiện thanh lý."
           : "Vị thế chưa đủ điều kiện thanh lý.",
       );
+      if (Number(previewData.healthFactor) < LIQUIDATION_OPPORTUNITY_THRESHOLD) {
+        const syncResponse = await fetch("/api/liquidation-watchlist", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            address: borrowerAddress,
+            chainId,
+            action: "add",
+          }),
+        });
+
+        if (!syncResponse.ok) {
+          console.error("Failed to add low-HF borrower to shared watchlist");
+        }
+
+        await loadOpportunities();
+      }
     } catch (e) {
       console.error(e);
       setPreview(null);
