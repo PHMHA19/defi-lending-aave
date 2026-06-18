@@ -698,9 +698,20 @@ const [
         "Borrow success",
       );
 
-      await loadAccountData();
+      await fetch("/api/liquidation-watchlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address: address,
+          action: "add",
+        }),
+      });
 
-      await loadReserves();
+await loadAccountData();
+
+await loadReserves();
 
     } catch (
       error
@@ -1024,9 +1035,38 @@ const [
       alert(
         "Repay success",
       );
+
       await loadAccountData();
 
       await loadReserves();
+
+      /*
+      * Nếu user đã hết nợ thì xóa khỏi watchlist
+      */
+      const refreshedPositions =
+        await getUserPositions(
+          address as `0x${string}`,
+        );
+
+      const stillHasDebt =
+        refreshedPositions.some(
+          p =>
+            p.variableDebt > 0n ||
+            p.stableDebt > 0n,
+        );
+
+      if (!stillHasDebt) {
+        await fetch("/api/liquidation-watchlist", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            address,
+            action: "remove",
+          }),
+        });
+      }
 
     } catch (
       error

@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import LiquidationOpportunitiesTable, {
+  type LiquidationOpportunity,
+} from "~~/components/aave/LiquidationOpportunitiesTable";
 import { useAccount, useChainId } from "wagmi";
 import { isAddress, getAddress, type Address, formatUnits} from "viem";
 import { getAllReserveData, getUserPositions } from "~~/services/aave/reserve";
@@ -95,6 +98,8 @@ export default function LiquidationPage() {
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [txHash, setTxHash] = useState<string>("");
+  const [opportunities, setOpportunities] = useState<LiquidationOpportunity[]>([]);
+  const [loadingOpportunities, setLoadingOpportunities] = useState(false);
 
   const reservesByAsset = useMemo(() => {
     return new Map<
@@ -140,6 +145,38 @@ export default function LiquidationPage() {
     () => (selectedDebtAsset ? reservesByAsset.get(selectedDebtAsset as `0x${string}`) ?? null : null),
     [reservesByAsset, selectedDebtAsset],
   );
+
+  const loadOpportunities = useCallback(async () => {
+    setLoadingOpportunities(true);
+
+    try {
+      const response = await fetch(`/api/liquidation-candidates?chainId=${chainId}`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể tải danh sách liquidation opportunities.");
+      }
+
+      const json = await response.json();
+      setOpportunities(Array.isArray(json?.candidates) ? json.candidates : []);
+    } catch (error) {
+      console.error(error);
+      setOpportunities([]);
+    } finally {
+      setLoadingOpportunities(false);
+    }
+  }, [chainId]);
+
+  useEffect(() => {
+    void loadOpportunities();
+
+    const timer = window.setInterval(() => {
+      void loadOpportunities();
+    }, 30000);
+
+    return () => window.clearInterval(timer);
+  }, [loadOpportunities]);
 
   const liquidationQuote = useMemo(() => {
     if (
@@ -258,11 +295,13 @@ export default function LiquidationPage() {
     preview.isLiquidatable &&
     Boolean(liquidationQuote?.isValid);
 
-  const handleLoadPreview = async () => {
+  const handleLoadPreview = async (borrowerInput?: string) => {
     setError("");
     setStatus("");
 
-    if (!isAddress(borrower)) {
+    const targetBorrower = borrowerInput ?? borrower;
+
+    if (!isAddress(targetBorrower)) {
       setPreview(null);
       setError("Địa chỉ người vay không hợp lệ.");
       return;
@@ -271,7 +310,7 @@ export default function LiquidationPage() {
     try {
       setLoadingPreview(true);
 
-      const borrowerAddress = getAddress(borrower) as `0x${string}`;
+      const borrowerAddress = getAddress(targetBorrower) as `0x${string}`;
 
       const [previewData, reserveData, positions] = await Promise.all([
         getLiquidationPreview(borrowerAddress, chainId),
@@ -319,6 +358,12 @@ export default function LiquidationPage() {
     } finally {
       setLoadingPreview(false);
     }
+  };
+
+  const handleSelectOpportunity = async (address: `0x${string}`) => {
+    setBorrower(address);
+    await handleLoadPreview(address);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLiquidation = async () => {
@@ -375,6 +420,7 @@ export default function LiquidationPage() {
       setStatus("Thanh lý thành công.");
 
       await handleLoadPreview();
+      await loadOpportunities();
     } catch (e: any) {
       console.error(e);
       const message =
@@ -467,7 +513,7 @@ export default function LiquidationPage() {
                   value={borrower}
                   onChange={(e: any) => setBorrower(e.target.value)}
                   placeholder="0x..."
-                  onBlur={handleLoadPreview}
+                  onBlur={() => void handleLoadPreview()}
                 />
               </div>
 
@@ -819,6 +865,22 @@ export default function LiquidationPage() {
             <div>4. Nhập số lượng debt muốn cover theo đơn vị gốc của token debt.</div>
             <div>5. Bấm “Thanh lý”. UI sẽ tự approve rồi gọi liquidationCall.</div>
           </div>
+        </section>
+        <section
+          style={{
+            marginTop: 20,
+          }}
+        >
+          <LiquidationOpportunitiesTable
+            candidates={opportunities}
+            loading={loadingOpportunities}
+            onRefresh={() => void loadOpportunities()}
+            onSelect={(address) => {
+              void handleSelectOpportunity(
+                address as `0x${string}`,
+              );
+            }}
+          />
         </section>
       </div>
     </div>
