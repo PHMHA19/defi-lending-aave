@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LiquidationOpportunitiesTable, {
   type LiquidationOpportunity,
 } from "~~/components/aave/LiquidationOpportunitiesTable";
@@ -101,7 +101,7 @@ export default function LiquidationPage() {
   const [txHash, setTxHash] = useState<string>("");
   const [opportunities, setOpportunities] = useState<LiquidationOpportunity[]>([]);
   const [loadingOpportunities, setLoadingOpportunities] = useState(false);
-
+  const hasBackfilledRef = useRef(false);
   const reservesByAsset = useMemo(() => {
     return new Map<
       `0x${string}`,
@@ -147,11 +147,19 @@ export default function LiquidationPage() {
     [reservesByAsset, selectedDebtAsset],
   );
 
-  const loadOpportunities = useCallback(async () => {
+  const loadOpportunities = useCallback(async (refresh = false) => {
     setLoadingOpportunities(true);
 
     try {
-      const response = await fetch(`/api/liquidation-candidates?chainId=${chainId}`, {
+      const params = new URLSearchParams({
+        chainId: String(chainId),
+      });
+
+      if (refresh) {
+        params.set("refresh", "1");
+      }
+
+      const response = await fetch(`/api/liquidation-candidates?${params.toString()}`, {
         cache: "no-store",
       });
 
@@ -170,13 +178,37 @@ export default function LiquidationPage() {
   }, [chainId]);
 
   useEffect(() => {
-    void loadOpportunities();
+    void loadOpportunities(true);
 
-    const timer = window.setInterval(() => {
-      void loadOpportunities();
+    const readTimer = window.setInterval(() => {
+      void loadOpportunities(false);
     }, 30000);
 
-    return () => window.clearInterval(timer);
+    const syncTimer = window.setInterval(() => {
+      void loadOpportunities(true);
+    }, 300000);
+
+    return () => {
+      window.clearInterval(readTimer);
+      window.clearInterval(syncTimer);
+    };
+  }, [loadOpportunities]);
+  
+  useEffect(() => {
+    if (hasBackfilledRef.current) return;
+    hasBackfilledRef.current = true;
+
+    void (async () => {
+      try {
+        await fetch("/api/liquidation-backfill", {
+          method: "POST",
+        });
+
+        await loadOpportunities(true);
+      } catch (error) {
+        console.error("Failed to backfill liquidation history", error);
+      }
+    })();
   }, [loadOpportunities]);
 
   const liquidationQuote = useMemo(() => {
@@ -365,7 +397,7 @@ export default function LiquidationPage() {
           console.error("Failed to add low-HF borrower to shared watchlist");
         }
 
-        await loadOpportunities();
+        await loadOpportunities(true);
       }
     } catch (e) {
       console.error(e);
@@ -440,7 +472,7 @@ export default function LiquidationPage() {
       setStatus("Thanh lý thành công.");
 
       await handleLoadPreview();
-      await loadOpportunities();
+      await loadOpportunities(true);
     } catch (e: any) {
       console.error(e);
       const message =
@@ -894,7 +926,7 @@ export default function LiquidationPage() {
           <LiquidationOpportunitiesTable
             candidates={opportunities}
             loading={loadingOpportunities}
-            onRefresh={() => void loadOpportunities()}
+            onRefresh={() => void loadOpportunities(true)}
             onSelect={(address) => {
               void handleSelectOpportunity(
                 address as `0x${string}`,

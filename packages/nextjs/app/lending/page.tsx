@@ -139,7 +139,15 @@ export default function TestPage() {
     address,
   } = useAccount();
   const chainId = useChainId();
-
+    async function refreshLiquidationCandidates() {
+    try {
+      await fetch(`/api/liquidation-candidates?chainId=${chainId}&refresh=1`, {
+        cache: "no-store",
+      });
+    } catch (error) {
+      console.error("Failed to refresh liquidation candidates", error);
+    }
+  }
 
   const handleFaucetUSDC = async () => {
     try {
@@ -559,8 +567,8 @@ const [
        * Reload account data
        */
       await loadAccountData();
-
       await loadReserves();
+      await refreshLiquidationCandidates();
 
     } catch (err) {
       console.error(err);
@@ -700,25 +708,25 @@ const [
         "Borrow success",
       );
 
-      const syncResponse = await fetch("/api/liquidation-watchlist", {
+        const syncResponse = await fetch("/api/liquidation-watchlist", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          address,
-          chainId,
-          action: "add",
-        }),
-      });
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            address,
+            chainId,
+            action: "add",
+          }),
+        });
 
-if (!syncResponse.ok) {
-  console.error("Failed to add borrower to shared watchlist");
-}
+        if (!syncResponse.ok) {
+          console.error("Failed to add borrower to watchlist");
+        }
 
-await loadAccountData();
-
-await loadReserves();
+        await loadAccountData();
+        await loadReserves();
+        await refreshLiquidationCandidates();
 
     } catch (
       error
@@ -833,6 +841,7 @@ await loadReserves();
       await loadAccountData();
 
       await loadReserves();
+      await refreshLiquidationCandidates();
 
     } catch (
       error
@@ -873,6 +882,7 @@ await loadReserves();
 
       await loadAccountData();
       await loadReserves();
+      await refreshLiquidationCandidates();
 
     } catch (error: any) {
       console.error(error);
@@ -1044,7 +1054,6 @@ await loadReserves();
       );
 
       await loadAccountData();
-
       await loadReserves();
 
       /*
@@ -1079,6 +1088,8 @@ await loadReserves();
           console.error("Failed to remove borrower from shared watchlist");
         }
       }
+
+      await refreshLiquidationCandidates();
 
     } catch (
       error

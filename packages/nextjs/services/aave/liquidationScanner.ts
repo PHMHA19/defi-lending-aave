@@ -1,10 +1,9 @@
 import { getAddress, type Address } from "viem";
-import { getLiquidationPreview } from "./liquidation";
 import { getSupabaseAdminClient } from "../supabase/server";
 
 const WATCHLIST_TABLE = "liquidation_watchlist";
+const CANDIDATES_TABLE = "liquidation_candidates";
 const DEFAULT_CHAIN_ID = 11155111;
-const HF_ALERT_THRESHOLD = 1.1;
 
 export type LiquidationCandidate = {
   address: Address;
@@ -16,6 +15,12 @@ type WatchlistRow = {
   address: string;
 };
 
+type CandidateRow = {
+  address: string;
+  health_factor: number | string;
+  updated_at: string;
+};
+
 function resolveChainId(chainId?: number) {
   return Number.isFinite(chainId ?? NaN) ? (chainId as number) : DEFAULT_CHAIN_ID;
 }
@@ -24,7 +29,7 @@ function normalizeAddress(address: string): Address {
   return getAddress(address) as Address;
 }
 
-async function readWatchlistAddresses(chainId?: number): Promise<Address[]> {
+export async function readLiquidationWatchlist(chainId?: number): Promise<Address[]> {
   const resolvedChainId = resolveChainId(chainId);
   const supabase = getSupabaseAdminClient();
 
@@ -55,13 +60,12 @@ async function readWatchlistAddresses(chainId?: number): Promise<Address[]> {
   return [...new Set(addresses)];
 }
 
-export async function readLiquidationWatchlist(chainId?: number): Promise<Address[]> {
-  return readWatchlistAddresses(chainId);
-}
-
-export async function addBorrowerToWatchlist(address: string, chainId?: number): Promise<Address[]> {
-  const normalized = normalizeAddress(address);
+export async function addBorrowerToWatchlist(
+  address: string,
+  chainId?: number,
+): Promise<Address[]> {
   const resolvedChainId = resolveChainId(chainId);
+  const normalized = normalizeAddress(address);
   const supabase = getSupabaseAdminClient();
 
   const { error } = await supabase.from(WATCHLIST_TABLE).upsert(
@@ -70,60 +74,71 @@ export async function addBorrowerToWatchlist(address: string, chainId?: number):
       address: normalized,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "chain_id,address" },
+    {
+      onConflict: "chain_id,address",
+    },
   );
 
   if (error) {
     throw new Error(`Không thể thêm ví vào watchlist: ${error.message}`);
   }
 
-  return readWatchlistAddresses(resolvedChainId);
+  return readLiquidationWatchlist(resolvedChainId);
 }
 
-export async function removeBorrowerFromWatchlist(address: string, chainId?: number): Promise<Address[]> {
+export async function removeBorrowerFromWatchlist(
+  address: string,
+  chainId?: number,
+): Promise<Address[]> {
+  const resolvedChainId = resolveChainId(chainId);
   const normalized = normalizeAddress(address);
+  const supabase = getSupabaseAdminClient();
+
+  const [{ error: watchlistError }, { error: candidateError }] = await Promise.all([
+    supabase
+      .from(WATCHLIST_TABLE)
+      .delete()
+      .eq("chain_id", resolvedChainId)
+      .eq("address", normalized),
+    supabase
+      .from(CANDIDATES_TABLE)
+      .delete()
+      .eq("chain_id", resolvedChainId)
+      .eq("address", normalized),
+  ]);
+
+  if (watchlistError) {
+    throw new Error(`Không thể xóa ví khỏi watchlist: ${watchlistError.message}`);
+  }
+
+  if (candidateError) {
+    throw new Error(`Không thể xóa candidate: ${candidateError.message}`);
+  }
+
+  return readLiquidationWatchlist(resolvedChainId);
+}
+
+export async function readLiquidationCandidates(
+  chainId?: number,
+): Promise<LiquidationCandidate[]> {
   const resolvedChainId = resolveChainId(chainId);
   const supabase = getSupabaseAdminClient();
 
-  const { error } = await supabase
-    .from(WATCHLIST_TABLE)
-    .delete()
+  const { data, error } = await supabase
+    .from(CANDIDATES_TABLE)
+    .select("address, health_factor, updated_at")
     .eq("chain_id", resolvedChainId)
-    .eq("address", normalized);
+    .order("health_factor", { ascending: true });
 
   if (error) {
-    throw new Error(`Không thể xóa ví khỏi watchlist: ${error.message}`);
+    throw new Error(`Không thể đọc liquidation candidates: ${error.message}`);
   }
 
-  return readWatchlistAddresses(resolvedChainId);
-}
+  const rows = (data ?? []) as CandidateRow[];
 
-export async function scanLiquidationCandidates(chainId?: number): Promise<LiquidationCandidate[]> {
-  const resolvedChainId = resolveChainId(chainId);
-  const watchlist = await readWatchlistAddresses(resolvedChainId);
-
-  const results = await Promise.all(
-    watchlist.map(async address => {
-      try {
-        const preview = await getLiquidationPreview(address, resolvedChainId);
-        const hf = Number(preview.healthFactor);
-
-        if (!Number.isFinite(hf)) return null;
-        if (hf >= HF_ALERT_THRESHOLD) return null;
-
-        return {
-          address,
-          healthFactor: hf,
-          updatedAt: new Date().toISOString(),
-        } satisfies LiquidationCandidate;
-      } catch (error) {
-        console.error(`scanLiquidationCandidates(${address}) failed`, error);
-        return null;
-      }
-    }),
-  );
-
-  return results
-    .filter((item): item is LiquidationCandidate => Boolean(item))
-    .sort((a, b) => a.healthFactor - b.healthFactor);
+  return rows.map(row => ({
+    address: normalizeAddress(row.address),
+    healthFactor: Number(row.health_factor),
+    updatedAt: row.updated_at,
+  }));
 }

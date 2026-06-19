@@ -8,7 +8,7 @@ import {
 
 export const runtime = "nodejs";
 
-function parseChainId(value: unknown): number | undefined {
+function parseChainId(value: string | null | undefined): number | undefined {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
@@ -40,12 +40,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid address" }, { status: 400 });
     }
 
+    let borrowers;
     if (action === "remove") {
-      const borrowers = await removeBorrowerFromWatchlist(address, chainId);
-      return NextResponse.json({ borrowers, count: borrowers.length });
+      borrowers = await removeBorrowerFromWatchlist(address, chainId);
+    } else {
+      borrowers = await addBorrowerToWatchlist(address, chainId);
     }
 
-    const borrowers = await addBorrowerToWatchlist(address, chainId);
     return NextResponse.json({ borrowers, count: borrowers.length });
   } catch (error) {
     console.error(error);
