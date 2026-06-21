@@ -100,7 +100,7 @@ contract VotingMachine is VotingMachineWithProofs, IVotingMachine {
             originSender,
             originChainId,
             true,
-            uint8(messageType),
+            messageType,
             message,
             empty
           );
@@ -109,7 +109,7 @@ contract VotingMachine is VotingMachineWithProofs, IVotingMachine {
             originSender,
             originChainId,
             false,
-            uint8(messageType),
+            messageType,
             message,
             decodingError
           );
