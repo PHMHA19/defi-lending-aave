@@ -25,6 +25,11 @@ contract Initializable {
   bool private initializing;
 
   /**
+   * @dev Tracks the last initialized revision.
+   */
+  uint256 private initializedVersion;
+
+  /**
    * @dev Modifier to use in the initializer function of a contract.
    */
   modifier initializer() {
@@ -37,6 +42,30 @@ contract Initializable {
     if (isTopLevelCall) {
       initializing = true;
       initialized = true;
+      initializedVersion = 1;
+    }
+
+    _;
+
+    if (isTopLevelCall) {
+      initializing = false;
+    }
+  }
+
+  /**
+   * @dev Modifier to use in a reinitializer function.
+   */
+  modifier reinitializer(uint256 version) {
+    require(
+      initializing || isConstructor() || version > initializedVersion,
+      'Reinitializer version is too low'
+    );
+
+    bool isTopLevelCall = !initializing;
+    if (isTopLevelCall) {
+      initializing = true;
+      initialized = true;
+      initializedVersion = version;
     }
 
     _;

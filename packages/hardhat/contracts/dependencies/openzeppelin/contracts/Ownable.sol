@@ -41,8 +41,25 @@ contract Ownable is Context {
    * @dev Throws if called by any account other than the owner.
    */
   modifier onlyOwner() {
-    require(_owner == _msgSender(), 'Ownable: caller is not the owner');
+    _checkOwner();
     _;
+  }
+
+  /**
+   * @dev Reverts if called by any account other than the owner.
+   */
+  function _checkOwner() internal view virtual {
+    require(_owner == _msgSender(), 'Ownable: caller is not the owner');
+  }
+
+  /**
+   * @dev Transfers ownership of the contract to a new account (`newOwner`).
+   * Can only be called by the current owner.
+   */
+  function _transferOwnership(address newOwner) internal virtual {
+    require(newOwner != address(0), 'Ownable: new owner is the zero address');
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
   }
 
   /**
@@ -53,8 +70,7 @@ contract Ownable is Context {
    * thereby removing any functionality that is only available to the owner.
    */
   function renounceOwnership() public virtual onlyOwner {
-    emit OwnershipTransferred(_owner, address(0));
-    _owner = address(0);
+    _transferOwnership(address(0));
   }
 
   /**
@@ -62,8 +78,6 @@ contract Ownable is Context {
    * Can only be called by the current owner.
    */
   function transferOwnership(address newOwner) public virtual onlyOwner {
-    require(newOwner != address(0), 'Ownable: new owner is the zero address');
-    emit OwnershipTransferred(_owner, newOwner);
-    _owner = newOwner;
+    _transferOwnership(newOwner);
   }
 }

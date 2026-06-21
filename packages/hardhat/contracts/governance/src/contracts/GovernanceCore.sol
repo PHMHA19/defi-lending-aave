@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import {Initializable} from '@openzeppelin/contracts/proxy/utils/Initializable.sol';
+import {Initializable} from '../../../dependencies/openzeppelin/upgradeability/Initializable.sol';
 import {OwnableWithGuardian} from './helpers/OwnableWithGuardian.sol';
-import {SafeCast} from '@openzeppelin/contracts/utils/math/SafeCast.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {
   IGovernanceCore,
   IGovernancePowerStrategy,
   PayloadsControllerUtils
 } from '../interfaces/IGovernanceCore.sol';
 
-import {EnumerableSet}
-from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {EnumerableSet} from '../contracts/libraries/EnumerableSet.sol';
 import {IVotingPortal} from '../interfaces/IVotingPortal.sol';
 import {Errors} from './libraries/Errors.sol';
 import {IBaseVotingStrategy} from '../interfaces/IBaseVotingStrategy.sol';
@@ -748,7 +747,7 @@ abstract contract GovernanceCore is
    */
   function _normalize(uint256 value) internal pure returns (uint56) {
     uint256 normalizedValue = value / PRECISION_DIVIDER;
-    return normalizedValue.toUint56();
+    return uint56(normalizedValue);
   }
 
   /**

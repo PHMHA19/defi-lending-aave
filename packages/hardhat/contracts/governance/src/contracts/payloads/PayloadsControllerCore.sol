@@ -8,10 +8,9 @@ import {
     IRescuable,
     IRescuableBase
 } from '../helpers/Rescuable.sol';
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {Initializable} from '@openzeppelin/contracts/proxy/utils/Initializable.sol';
-// import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {SafeCast} from '@openzeppelin/contracts/utils/math/SafeCast.sol';
+import {IERC20} from '../../../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {Initializable} from '../../../../dependencies/openzeppelin/upgradeability/Initializable.sol';
+import {SafeCast} from '../../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 import {IPayloadsControllerCore, PayloadsControllerUtils} from './interfaces/IPayloadsControllerCore.sol';
 import {IExecutor} from './interfaces/IExecutor.sol';
@@ -33,7 +32,6 @@ abstract contract PayloadsControllerCore is
   Initializable
 {
   using SafeCast for uint256;
-  // using SafeERC20 for IERC20;
 
   uint40 internal _payloadsCount;
 
@@ -220,8 +218,8 @@ abstract contract PayloadsControllerCore is
 
   /// @inheritdoc IRescuableBase
   function maxRescue(
-  address erc20Token
-) public view override returns (uint256) {
+    address erc20Token
+  ) public view override returns (uint256) {
     return IERC20(erc20Token).balanceOf(address(this));
   }
 
