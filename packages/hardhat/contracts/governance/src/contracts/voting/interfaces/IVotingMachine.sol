@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import {IBaseReceiverPortal} from '../../../interfaces/IBaseReceiverPortal.sol';
-import {IVotingPortal} from '../../../interfaces/IVotingPortal.sol';
 import {IVotingMachineWithProofs} from './IVotingMachineWithProofs.sol';
 
 /**
@@ -11,6 +10,11 @@ import {IVotingMachineWithProofs} from './IVotingMachineWithProofs.sol';
  * @notice interface containing the methods definitions of the VotingMachine contract
  */
 interface IVotingMachine is IBaseReceiverPortal {
+  enum MessageType {
+    Proposal,
+    Vote
+  }
+
   /**
    * @notice emitted when gas limit gets updated
    * @param gasLimit the new gas limit
@@ -30,7 +34,7 @@ interface IVotingMachine is IBaseReceiverPortal {
     address indexed originSender,
     uint256 indexed originChainId,
     bool indexed delivered,
-    IVotingPortal.MessageType messageType,
+    MessageType messageType,
     bytes message,
     bytes reason
   );
@@ -74,7 +78,7 @@ interface IVotingMachine is IBaseReceiverPortal {
    */
   function decodeMessage(
     bytes memory message
-  ) external view returns (IVotingPortal.MessageType, bytes memory);
+  ) external view returns (MessageType, bytes memory);
 
   /**
    * @notice method to decode a vote message

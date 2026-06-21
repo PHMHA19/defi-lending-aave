@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
-import {SafeCast} from '@openzeppelin/contracts/utils/math/SafeCast.sol';
+import {Ownable} from '../../../../dependencies/openzeppelin/contracts/Ownable.sol';
+import {SafeCast} from '../../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {StateProofVerifier} from './libs/StateProofVerifier.sol';
 import {IVotingMachineWithProofs, IDataWarehouse, IVotingStrategy} from './interfaces/IVotingMachineWithProofs.sol';
 import {IBaseVotingStrategy} from '../../interfaces/IBaseVotingStrategy.sol';
@@ -83,7 +83,7 @@ abstract contract VotingMachineWithProofs is
   constructor(
     IVotingStrategy votingStrategy,
     address governance
-  ) Ownable(_msgSender()) EIP712(NAME, 'V1') {
+  ) Ownable() EIP712(NAME, 'V1') {
     require(
       address(votingStrategy) != address(0),
       Errors.INVALID_VOTING_STRATEGY
@@ -465,7 +465,7 @@ abstract contract VotingMachineWithProofs is
     }
 
     vote.support = support;
-    vote.votingPower = votingPower.toUint248();
+    vote.votingPower = uint248(votingPower);
 
     emit VoteEmitted(proposalId, voter, support, votingPower);
   }

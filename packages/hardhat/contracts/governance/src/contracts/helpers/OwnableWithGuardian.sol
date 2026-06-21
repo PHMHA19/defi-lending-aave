@@ -6,7 +6,7 @@ import {Ownable} from '../../../../dependencies/openzeppelin/contracts/Ownable.s
 contract OwnableWithGuardian is Ownable {
   address internal _guardian;
 
-  constructor() Ownable() {
+  constructor() {
     _guardian = msg.sender;
   }
 

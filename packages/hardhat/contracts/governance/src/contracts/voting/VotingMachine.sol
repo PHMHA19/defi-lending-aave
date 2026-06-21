@@ -2,7 +2,8 @@
 pragma solidity ^0.8.0;
 
 import {ICrossChainController} from '../../interfaces/ICrossChainController.sol';
-import {IVotingMachine, IBaseReceiverPortal, IVotingPortal} from './interfaces/IVotingMachine.sol';
+import {IBaseReceiverPortal} from '../../interfaces/IBaseReceiverPortal.sol';
+import {IVotingMachine} from './interfaces/IVotingMachine.sol';
 import {VotingMachineWithProofs, IDataWarehouse, IVotingStrategy, IVotingMachineWithProofs} from './VotingMachineWithProofs.sol';
 import {Errors} from '../libraries/Errors.sol';
 
@@ -84,11 +85,11 @@ contract VotingMachine is VotingMachineWithProofs, IVotingMachine {
     );
 
     try this.decodeMessage(messageWithType) returns (
-      IVotingPortal.MessageType messageType,
+      IVotingMachine.MessageType messageType,
       bytes memory message
     ) {
       bytes memory empty;
-      if (messageType == IVotingPortal.MessageType.Proposal) {
+      if (messageType == IVotingMachine.MessageType.Proposal) {
         try this.decodeProposalMessage(message) returns (
           uint256 proposalId,
           bytes32 blockHash,
@@ -99,7 +100,7 @@ contract VotingMachine is VotingMachineWithProofs, IVotingMachine {
             originSender,
             originChainId,
             true,
-            messageType,
+            uint8(messageType),
             message,
             empty
           );
@@ -108,7 +109,7 @@ contract VotingMachine is VotingMachineWithProofs, IVotingMachine {
             originSender,
             originChainId,
             false,
-            messageType,
+            uint8(messageType),
             message,
             decodingError
           );
@@ -137,9 +138,18 @@ contract VotingMachine is VotingMachineWithProofs, IVotingMachine {
   )
     external
     pure
-    returns (uint256, address, bool, VotingAssetWithSlot[] memory)
+    returns (
+      uint256,
+      address,
+      bool,
+      IVotingMachineWithProofs.VotingAssetWithSlot[] memory
+    )
   {
-    return abi.decode(message, (uint256, address, bool, VotingAssetWithSlot[]));
+    return
+      abi.decode(
+        message,
+        (uint256, address, bool, IVotingMachineWithProofs.VotingAssetWithSlot[])
+      );
   }
 
   /// @inheritdoc IVotingMachine
@@ -152,8 +162,8 @@ contract VotingMachine is VotingMachineWithProofs, IVotingMachine {
   /// @inheritdoc IVotingMachine
   function decodeMessage(
     bytes memory message
-  ) external pure returns (IVotingPortal.MessageType, bytes memory) {
-    return abi.decode(message, (IVotingPortal.MessageType, bytes));
+  ) external pure returns (IVotingMachine.MessageType, bytes memory) {
+    return abi.decode(message, (IVotingMachine.MessageType, bytes));
   }
 
   /**
