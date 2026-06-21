@@ -11,6 +11,42 @@ export default deployScript(
     const { deploy, execute, namedAccounts } = env;
     const { deployer } = namedAccounts;
 
+    const chainId = BigInt(env.network.chain.id);
+
+    const governanceTokenAddress = process.env.GOVERNANCE_TOKEN_ADDRESS;
+    if (!governanceTokenAddress) {
+      throw new Error("Missing GOVERNANCE_TOKEN_ADDRESS");
+    }
+
+    const l1YesThreshold = BigInt(
+      process.env.L1_YES_THRESHOLD ?? "320000000000000000000000"
+    );
+    const l1YesNoDifferential = BigInt(
+      process.env.L1_YES_NO_DIFFERENTIAL ?? "80000000000000000000000"
+    );
+    const l1MinPropositionPower = BigInt(
+      process.env.L1_MIN_PROPOSITION_POWER ?? "80000000000000000000000"
+    );
+    const l2YesThreshold = BigInt(
+      process.env.L2_YES_THRESHOLD ?? "1040000000000000000000000"
+    );
+    const l2YesNoDifferential = BigInt(
+      process.env.L2_YES_NO_DIFFERENTIAL ?? "1040000000000000000000000"
+    );
+    const l2MinPropositionPower = BigInt(
+      process.env.L2_MIN_PROPOSITION_POWER ?? "200000000000000000000000"
+    );
+    const gasLimit = BigInt(
+      process.env.GOVERNANCE_GAS_LIMIT ?? "1000000"
+    );
+    const cancellationFee = BigInt(
+      process.env.GOVERNANCE_CANCELLATION_FEE ?? "1000000000000000"
+    );
+
+    const votingPortals = process.env.VOTING_PORTAL_ADDRESS
+      ? [process.env.VOTING_PORTAL_ADDRESS as `0x${string}`]
+      : [];
+
     console.log("Deploying governance executors...");
 
     const level1Executor = await deploy("Level1Executor", {
@@ -28,6 +64,7 @@ export default deployScript(
     const powerStrategy = await deploy("GovernancePowerStrategy", {
       account: deployer,
       artifact: artifacts.GovernancePowerStrategy,
+      args: [governanceTokenAddress as `0x${string}`],
     });
 
     console.log("Deploying payloads controller...");
@@ -35,11 +72,7 @@ export default deployScript(
     const payloadsController = await deploy("PayloadsController", {
       account: deployer,
       artifact: artifacts.PayloadsController,
-      args: [
-        deployer,
-        deployer,
-        31337n,
-      ],
+      args: [deployer, deployer, chainId],
     });
 
     console.log("Initializing payloads controller...");
@@ -74,11 +107,7 @@ export default deployScript(
     const governance = await deploy("Governance", {
       account: deployer,
       artifact: artifacts.Governance,
-      args: [
-        deployer,
-        ONE_DAY_BIGINT,
-        deployer,
-      ],
+      args: [deployer, ONE_DAY_BIGINT, deployer],
     });
 
     console.log("Initializing governance...");
@@ -95,22 +124,22 @@ export default deployScript(
             accessLevel: 1,
             coolDownBeforeVotingStart: ONE_DAY,
             votingDuration: THREE_DAYS,
-            yesThreshold: 320_000n * 10n ** 18n,
-            yesNoDifferential: 80_000n * 10n ** 18n,
-            minPropositionPower: 80_000n * 10n ** 18n,
+            yesThreshold: l1YesThreshold,
+            yesNoDifferential: l1YesNoDifferential,
+            minPropositionPower: l1MinPropositionPower,
           },
           {
             accessLevel: 2,
             coolDownBeforeVotingStart: ONE_DAY,
             votingDuration: TEN_DAYS,
-            yesThreshold: 1_040_000n * 10n ** 18n,
-            yesNoDifferential: 1_040_000n * 10n ** 18n,
-            minPropositionPower: 200_000n * 10n ** 18n,
+            yesThreshold: l2YesThreshold,
+            yesNoDifferential: l2YesNoDifferential,
+            minPropositionPower: l2MinPropositionPower,
           },
         ],
-        [deployer],
-        1_000_000n,
-        0n,
+        votingPortals,
+        gasLimit,
+        cancellationFee,
       ],
     });
 

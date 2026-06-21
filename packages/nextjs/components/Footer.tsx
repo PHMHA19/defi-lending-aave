@@ -83,7 +83,7 @@ export const Footer = () => {
 
             <div className="text-center">
               <a
-                href="https://github.com/PHMHA19/defi-lending-viction"
+                href="https://github.com/PHMHA19/defi-lending-aave"
                 target="_blank"
                 rel="noreferrer"
                 className="link"

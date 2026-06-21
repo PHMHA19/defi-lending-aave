@@ -4,7 +4,10 @@ import Link from "next/link";
 import { Address } from "@scaffold-ui/components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
-import { BanknotesIcon } from "@heroicons/react/24/outline";
+import {
+  BanknotesIcon,
+  ShieldExclamationIcon,
+} from "@heroicons/react/24/outline";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
@@ -54,7 +57,7 @@ const Home: NextPage = () => {
         </div>
 
         <div className="grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col md:flex-row">
+          <div className="flex justify-center items-center gap-8 flex-col md:flex-row">
 
             <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl shadow-lg">
               <BanknotesIcon className="h-8 w-8 fill-secondary" />
@@ -63,10 +66,23 @@ const Home: NextPage = () => {
                 Tương tác với smart contract thông qua tab{" "}
                 <Link
                   href="/lending"
-                  
                   className="link"
                 >
                   Giao thức cho vay
+                </Link>
+              </p>
+            </div>
+
+            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl shadow-lg">
+              <ShieldExclamationIcon className="h-8 w-8 fill-warning" />
+
+              <p className="mt-4">
+                Xem và thực hiện thanh lý tài sản qua tab{" "}
+                <Link
+                  href="/liquidation"
+                  className="link"
+                >
+                  Thanh lý tài sản
                 </Link>
               </p>
             </div>
