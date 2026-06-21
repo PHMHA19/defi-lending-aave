@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IBaseReceiverPortal} from 'aave-delivery-infrastructure/contracts/interfaces/IBaseReceiverPortal.sol';
+// import {IBaseReceiverPortal} from 'aave-delivery-infrastructure/contracts/interfaces/IBaseReceiverPortal.sol';
 import {IPayloadsControllerCore} from './IPayloadsControllerCore.sol';
 import {PayloadsControllerUtils} from '../PayloadsControllerUtils.sol';
 
@@ -10,7 +10,7 @@ import {PayloadsControllerUtils} from '../PayloadsControllerUtils.sol';
  * @author BGD Labs
  * @notice interface containing the objects, events and methods definitions of the PayloadsController contract
  */
-interface IPayloadsController is IBaseReceiverPortal, IPayloadsControllerCore {
+interface IPayloadsController is IPayloadsControllerCore {
   /**
    * @notice get contract address from where the messages come
    * @return address of the message registry
@@ -30,7 +30,7 @@ interface IPayloadsController is IBaseReceiverPortal, IPayloadsControllerCore {
   function MESSAGE_ORIGINATOR() external view returns (address);
 
   /**
-   * @notice method to decode a message from from governance chain
+   * @notice method to decode a message from governance chain
    * @param message encoded message with message type
    * @return payloadId, accessLevel, proposalVoteActivationTimestamp from the decoded message
    */
@@ -40,4 +40,10 @@ interface IPayloadsController is IBaseReceiverPortal, IPayloadsControllerCore {
     external
     pure
     returns (uint40, PayloadsControllerUtils.AccessControl, uint40);
+
+  function queuePayload(
+    uint40 payloadId,
+    PayloadsControllerUtils.AccessControl accessLevel,
+    uint40 proposalVoteActivationTimestamp
+  ) external;
 }

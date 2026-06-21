@@ -3,8 +3,6 @@ pragma solidity ^0.8.0;
 
 import {PayloadsControllerUtils} from '../contracts/payloads/PayloadsControllerUtils.sol';
 import {IGovernancePowerStrategy} from './IGovernancePowerStrategy.sol';
-import {IVotingMachineWithProofs} from '../contracts/voting/interfaces/IVotingMachineWithProofs.sol';
-import {EnumerableSet} from 'openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol';
 
 /**
  * @title IGovernanceCore
@@ -239,12 +237,6 @@ interface IGovernanceCore {
    * @param support indicates if vote is in favor or against the proposal
    * @param votingAssetsWithSlot list of token addresses with the base storage slot to use for the vote
    */
-  event VoteForwarded(
-    uint256 indexed proposalId,
-    address indexed voter,
-    bool indexed support,
-    IVotingMachineWithProofs.VotingAssetWithSlot[] votingAssetsWithSlot
-  );
 
   /**
    * @notice emitted when the cancellation fee is updated

@@ -1,13 +1,19 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import {Initializable} from 'aave-delivery-infrastructure/contracts/old-oz/Initializable.sol';
-import {OwnableWithGuardian} from 'aave-delivery-infrastructure/contracts/old-oz/OwnableWithGuardian.sol';
-import {SafeCast} from 'openzeppelin-contracts/contracts/utils/math/SafeCast.sol';
-import {IGovernanceCore, IGovernancePowerStrategy, PayloadsControllerUtils, EnumerableSet} from '../interfaces/IGovernanceCore.sol';
+import {Initializable} from '@openzeppelin/contracts/proxy/utils/Initializable.sol';
+import {OwnableWithGuardian} from './helpers/OwnableWithGuardian.sol';
+import {SafeCast} from '@openzeppelin/contracts/utils/math/SafeCast.sol';
+import {
+  IGovernanceCore,
+  IGovernancePowerStrategy,
+  PayloadsControllerUtils
+} from '../interfaces/IGovernanceCore.sol';
+
+import {EnumerableSet}
+from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {IVotingPortal} from '../interfaces/IVotingPortal.sol';
 import {Errors} from './libraries/Errors.sol';
-import {IVotingMachineWithProofs} from './voting/interfaces/IVotingMachineWithProofs.sol';
 import {IBaseVotingStrategy} from '../interfaces/IBaseVotingStrategy.sol';
 
 /**
@@ -58,8 +64,10 @@ abstract contract GovernanceCore is
 
   // (accessLevel => VotingConfig) mapping storing the different voting configurations.
   // Indexed by access level (level 1, level 2)
-  mapping(PayloadsControllerUtils.AccessControl => VotingConfig)
-    internal _votingConfigs;
+  mapping(
+    PayloadsControllerUtils.AccessControl =>
+    IGovernanceCore.VotingConfig
+  ) internal _votingConfigs;
 
   // voter => chainId => representative.
   // Stores the representative of a voter by chain. A representative can vote on behalf of his represented voter
@@ -269,9 +277,9 @@ abstract contract GovernanceCore is
       }
     }
 
-    VotingConfig memory votingConfig = _votingConfigs[
-      maximumAccessLevelRequired
-    ];
+    IGovernanceCore.VotingConfig memory votingConfig = _votingConfigs[
+  maximumAccessLevelRequired
+];
 
     address proposalCreator = msg.sender;
     require(
@@ -303,7 +311,8 @@ abstract contract GovernanceCore is
   /// @inheritdoc IGovernanceCore
   function activateVoting(uint256 proposalId) external {
     Proposal storage proposal = _proposals[proposalId];
-    VotingConfig memory votingConfig = _votingConfigs[proposal.accessLevel];
+    IGovernanceCore.VotingConfig memory votingConfig =
+  _votingConfigs[proposal.accessLevel];
 
     uint40 proposalCreationTime = proposal.creationTime;
     bytes32 blockHash = blockhash(block.number - 1);
@@ -370,7 +379,8 @@ abstract contract GovernanceCore is
       Errors.VOTING_DURATION_NOT_PASSED
     );
 
-    VotingConfig memory votingConfig = _votingConfigs[proposal.accessLevel];
+    IGovernanceCore.VotingConfig memory votingConfig =
+  _votingConfigs[proposal.accessLevel];
 
     proposal.forVotes = forVotes;
     proposal.againstVotes = againstVotes;
@@ -525,8 +535,8 @@ abstract contract GovernanceCore is
 
   /// @inheritdoc IGovernanceCore
   function getVotingConfig(
-    PayloadsControllerUtils.AccessControl accessLevel
-  ) external view returns (VotingConfig memory) {
+  PayloadsControllerUtils.AccessControl accessLevel
+) external view returns (IGovernanceCore.VotingConfig memory) {
     return _votingConfigs[accessLevel];
   }
 
@@ -590,7 +600,8 @@ abstract contract GovernanceCore is
         Errors.INVALID_YES_NO_DIFFERENTIAL
       );
 
-      VotingConfig memory votingConfig = VotingConfig({
+      IGovernanceCore.VotingConfig memory votingConfig =
+  IGovernanceCore.VotingConfig({
         coolDownBeforeVotingStart: votingConfigs[i].coolDownBeforeVotingStart,
         votingDuration: votingConfigs[i].votingDuration,
         yesThreshold: _normalize(votingConfigs[i].yesThreshold),
@@ -611,10 +622,10 @@ abstract contract GovernanceCore is
 
     // validation of the voting configs after change, to make it not possible for lvl2 configuration to have configs
     // lower than lvl1
-    VotingConfig memory votingConfigL1 = _votingConfigs[
+    IGovernanceCore.VotingConfig memory votingConfigL1 = _votingConfigs[
       PayloadsControllerUtils.AccessControl.Level_1
     ];
-    VotingConfig memory votingConfigL2 = _votingConfigs[
+    IGovernanceCore.VotingConfig memory votingConfigL2 = _votingConfigs[
       PayloadsControllerUtils.AccessControl.Level_2
     ];
     require(
@@ -673,7 +684,7 @@ abstract contract GovernanceCore is
    * @return boolean indicating the passing of the yes threshold
    */
   function _isPassingYesThreshold(
-    VotingConfig memory votingConfig,
+    IGovernanceCore.VotingConfig memory votingConfig,
     uint256 forVotes
   ) internal pure returns (bool) {
     return forVotes > votingConfig.yesThreshold * PRECISION_DIVIDER;
@@ -687,7 +698,7 @@ abstract contract GovernanceCore is
    * @return boolean indicating the passing of the yes no differential
    */
   function _isPassingYesNoDifferential(
-    VotingConfig memory votingConfig,
+  IGovernanceCore.VotingConfig memory votingConfig,
     uint256 forVotes,
     uint256 againstVotes
   ) internal pure returns (bool) {

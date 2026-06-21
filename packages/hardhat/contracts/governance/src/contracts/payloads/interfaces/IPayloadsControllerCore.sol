@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IRescuable} from 'solidity-utils/contracts/utils/interfaces/IRescuable.sol';
+// import {IRescuable} from 'solidity-utils/contracts/utils/interfaces/IRescuable.sol';
 import {PayloadsControllerUtils} from '../PayloadsControllerUtils.sol';
 
 /**
@@ -9,7 +9,7 @@ import {PayloadsControllerUtils} from '../PayloadsControllerUtils.sol';
  * @author BGD Labs
  * @notice interface containing the objects, events and methods definitions of the IPayloadsControllerCore contract
  */
-interface IPayloadsControllerCore is IRescuable {
+interface IPayloadsControllerCore {
   /**
    * @notice Enum indicating the possible payload states
    * @dev PayloadState enum defines the state machine of a payload, so the order on which the state is

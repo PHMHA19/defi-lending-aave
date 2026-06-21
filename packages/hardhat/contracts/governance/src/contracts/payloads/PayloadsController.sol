@@ -2,7 +2,7 @@
 pragma solidity ^0.8.8;
 
 import {PayloadsControllerCore, PayloadsControllerUtils} from './PayloadsControllerCore.sol';
-import {IPayloadsController, IBaseReceiverPortal} from './interfaces/IPayloadsController.sol';
+import {IPayloadsController} from './interfaces/IPayloadsController.sol';
 import {Errors} from '../libraries/Errors.sol';
 
 /**
@@ -47,7 +47,7 @@ contract PayloadsController is PayloadsControllerCore, IPayloadsController {
     ORIGIN_CHAIN_ID = originChainId;
   }
 
-  /// @inheritdoc IBaseReceiverPortal
+ // Legacy cross-chain entrypoint
   function receiveCrossChainMessage(
     address originSender,
     uint256 originChainId,
@@ -84,7 +84,17 @@ contract PayloadsController is PayloadsControllerCore, IPayloadsController {
       );
     }
   }
-
+  function queuePayload(
+    uint40 payloadId,
+    PayloadsControllerUtils.AccessControl accessLevel,
+    uint40 proposalVoteActivationTimestamp
+  ) external {
+    _queuePayload(
+      payloadId,
+      accessLevel,
+      proposalVoteActivationTimestamp
+    );
+  }
   /// @inheritdoc IPayloadsController
   function decodeMessage(
     bytes memory message

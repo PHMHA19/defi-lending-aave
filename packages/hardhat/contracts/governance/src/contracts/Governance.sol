@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-
-import {ICrossChainForwarder} from 'aave-delivery-infrastructure/contracts/interfaces/ICrossChainForwarder.sol';
+import {IPayloadsController} from './payloads/interfaces/IPayloadsController.sol';
 import {GovernanceCore, PayloadsControllerUtils} from './GovernanceCore.sol';
 import {IGovernance, IGovernancePowerStrategy, IGovernanceCore} from '../interfaces/IGovernance.sol';
 import {Errors} from './libraries/Errors.sol';
@@ -106,16 +105,13 @@ contract Governance is GovernanceCore, IGovernance {
     PayloadsControllerUtils.Payload memory payload,
     uint40 proposalVoteActivationTimestamp
   ) internal override {
-    ICrossChainForwarder(CROSS_CHAIN_CONTROLLER).forwardMessage(
-      payload.chain,
-      payload.payloadsController,
-      _gasLimit,
-      abi.encode(
+
+    IPayloadsController(payload.payloadsController)
+      .queuePayload(
         payload.payloadId,
         payload.accessLevel,
         proposalVoteActivationTimestamp
-      )
-    );
+      );
   }
 
   /**
